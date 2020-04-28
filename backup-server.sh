@@ -1,0 +1,1 @@
+./backup-server --server-id <id|all> --path <path || "/srv/daemon-data"> --destination <destination || "config default">
