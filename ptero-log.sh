@@ -1,0 +1,1 @@
+./ptero-log.sh --wings --request --setup --installation <server_id> --live --panel
