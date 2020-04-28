@@ -14,12 +14,13 @@ sh public-ip-mapper.sh | Listens for docker events.
 sh public-ip-mapper.sh --remove all | Removes all rules added by the script.
 sh public-ip-mapper.sh --remove <server_id> | Removes rules added by the script for specific server.
 ```
-Log output: `sh public-ip-mapper.sh 2>&1 | tee ip-mapper.log`
+Example log output: `sh public-ip-mapper.sh 2>&1 | tee ip-mapper.log`
 
 You can use tmux, screen, systemd to "deamonize" the script so that it can constantly work on the background. 
 
-Example with screen: `screen -dmS public-ip-mapper sh screen -dmS backups_uploading`
-Example of a systemd service:`missing`
+Example with screen: `screen -dmS public-ip-mapper sh public-ip-mapper.sh`
+
+Example of a systemd service:`not yet`
 
 ## ptero-log.sh<span></span>
 A utility for more readable logs from the panel and the daemon.
@@ -32,3 +33,6 @@ This script aims to ease the backup process of the daemon data by providing opti
 
 ## restore-server.sh<span></span>
 If used alongside the backup script above admins can easily restore servers to specified date.
+
+# Contact and contribution
+If you have issues, ideas or want to contribute you can [join my discord server](https://discord.gg/VMSDGVD) to have a chat and explain your situation. :)
