@@ -25,9 +25,10 @@ Example with screen: `screen -dmS public-ip-mapper sh public-ip-mapper.sh`
 Example of a systemd service:`not yet`
 
 ## ptero-log.sh<span></span>
-A utility for more readable logs from the panel and the daemon.
+A utility for more readable logs from the panel and daemon.
 
 **Config requirements:**
+
 You will need to edit the following entries in **config.sh<span></span>** to suit your installation.
 ```
 # [global]
@@ -44,10 +45,13 @@ sh ptero-log.sh [options]
     --request | Shows prettified & colored json of /srv/daemon/logs/request.log
     --panel |
     --installation <server_id> | Shows scrollable install log of server
-    --live | Updates the log every live 
+    --live | Updates the log every live
+
+Note*: You can't use the arguments together! The only exception is --live as it can be combined with any of them.
 ```
 
 **Example:**`sh ptero-log.sh --wings --live`
+
 **Example2:**`sh ptero-log.sh --installation e13df76a-7b62-4dab-a427-6c959e5da36d --live`
 
 ## transfer-server.sh<span></span>
