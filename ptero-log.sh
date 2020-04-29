@@ -1,7 +1,5 @@
 #!/bin/bash
 
-#./ptero-log.sh --wings --request --setup --installation <server_id> --live --panel
-
 project_root=$(dirname $(realpath $0))
 source "$project_root/config.sh"
 
@@ -38,6 +36,10 @@ if [[ $setup == "y" ]];then
     echo "install dependencies"
 
 elif [[ $wings == "y" ]];then
+
+    # validate that the file exists
+    [[ ! -f "$DAEMON_DIR/logs/wings.log" ]] && echo "Couldn't find: $DAEMON_DIR/logs/wings.log" && exit
+
     if [[ $live == "y" ]];then
         tailf "$DAEMON_DIR/logs/wings.log" | jq -C .
     else
@@ -45,6 +47,10 @@ elif [[ $wings == "y" ]];then
     fi
 
 elif [[ $request == "y" ]];then
+
+    # validate that the file exists
+    [[ ! -f "$DAEMON_DIR/logs/request.log" ]] && echo "Couldn't find: $DAEMON_DIR/logs/request.log" && exit
+
     if [[ $live == "y" ]];then
         tailf "$DAEMON_DIR/logs/request.log" | jq -C .
     else
@@ -52,15 +58,23 @@ elif [[ $request == "y" ]];then
     fi
 
 elif [[ -n "$installation" ]];then
+
+    # validate that the file exists
+    [[ ! -f "$DAEMON_DIR/config/servers/$installation/install.log" ]] && echo "Couldn't find: $DAEMON_DIR/config/servers/$installation/install.log" && exit
+
     if [[ $live == "y" ]];then
         tailf -n 40 "$DAEMON_DIR/config/servers/$installation/install.log"
     else
         cat "$DAEMON_DIR/config/servers/$installation/install.log" | less -R +G
     fi
 elif [[ $panel == "y" ]];then
+
+    # validate that the file exists
+    [[ ! -f "$PANEL_DIR/storage/logs/laravel-$(date '+%Y-%m-%d').log" ]] && echo "Couldn't find: $PANEL_DIR/storage/logs/laravel-$(date '+%Y-%m-%d').log" && exit
+
     if [[ $live == "y" ]];then
-        echo panel
+        tailf -n 40 "$PANEL_DIR/storage/logs/laravel-$(date '+%Y-%m-%d').log"
     else
-        echo panel
+        less +G "$PANEL_DIR/storage/logs/laravel-$(date '+%Y-%m-%d').log"
     fi
 fi

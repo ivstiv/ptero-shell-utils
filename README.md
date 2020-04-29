@@ -34,6 +34,7 @@ You will need to edit the following entries in **config.sh<span></span>** to sui
 # [global]
 export DAEMON_DIR="/srv/daemon"
 export DAEMON_DATA_DIR="/srv/daemon-data"
+export PANEL_DIR="/var/www/pterodactyl"
 ```
 
 **Usage:**
@@ -43,9 +44,9 @@ sh ptero-log.sh [options]
     --setup | Installs needed dependencies
     --wings | Shows prettified & colored json of /srv/daemon/logs/wings.log
     --request | Shows prettified & colored json of /srv/daemon/logs/request.log
-    --panel |
+    --panel | Shows the latest log from PANEL_DIR/storage/logs
     --installation <server_id> | Shows scrollable install log of server
-    --live | Updates the log every live
+    --live | Updates the log live
 
 Note*: You can't use the arguments together! The only exception is --live as it can be combined with any of them.
 ```
@@ -62,6 +63,9 @@ This script aims to ease the backup process of the daemon data by providing opti
 
 ## restore-server.sh<span></span>
 If used alongside the backup script above admins can easily restore servers to specified date.
+
+## power-control.sh<span></span>
+Send power commands to groups of servers based on node, owner or ID.
 
 # Contact and contribution
 If you have issues, ideas or want to contribute you can [join my discord server](https://discord.gg/VMSDGVD) to have a chat and explain your situation. :)
