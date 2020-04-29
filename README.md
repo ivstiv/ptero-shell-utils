@@ -7,6 +7,8 @@ This is a collection of scripts for automating different things related to the [
 
 It basically solves [this](https://github.com/pterodactyl/panel/issues/459) problem which arises from the way docker works. The script listens for docker events and changes the NAT table of the POSTROUTING chain in iptables. Thanks to this script services with outgoing requests such as game servers to server lists can show the proper IP assigned in the panel rather than the default IP of the host. This could also resolve issues with 3rd party authentication services or enable hostings to completely change the IPs of their customers.  The script sets a static source IP as configured by the panel for all outgoing requests of the corresponding docker container. **This needs to run with root privileges because of iptables!**
 
+**Config requirements:** None
+
 **Usage:**
 
 ```
@@ -24,6 +26,29 @@ Example of a systemd service:`not yet`
 
 ## ptero-log.sh<span></span>
 A utility for more readable logs from the panel and the daemon.
+
+**Config requirements:**
+You will need to edit the following entries in **config.sh<span></span>** to suit your installation.
+```
+# [global]
+export DAEMON_DIR="/srv/daemon"
+export DAEMON_DATA_DIR="/srv/daemon-data"
+```
+
+**Usage:**
+
+```
+sh ptero-log.sh [options] 
+    --setup | Installs needed dependencies
+    --wings | Shows prettified & colored json of /srv/daemon/logs/wings.log
+    --request | Shows prettified & colored json of /srv/daemon/logs/request.log
+    --panel |
+    --installation <server_id> | Shows scrollable install log of server
+    --live | Updates the log every live 
+```
+
+**Example:**`sh ptero-log.sh --wings --live`
+**Example2:**`sh ptero-log.sh --installation e13df76a-7b62-4dab-a427-6c959e5da36d --live`
 
 ## transfer-server.sh<span></span>
 One command solution to transferring servers between nodes!
