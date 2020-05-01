@@ -7,18 +7,24 @@
 
 removeRule() {
 	echo "Removing rules from -t nat POSTROUTING: $1"
-	indexes=$(/sbin/iptables -t nat -nL POSTROUTING --line-number -w | grep $1 | awk '{print $1}' | tac)
-	for rule in $indexes; do
-		lastRule=$(/sbin/iptables -t nat -S POSTROUTING $rule -w)
-		/sbin/iptables -t nat -D POSTROUTING $rule -w
-		echo "Removed rule:$lastRule"
-	done
-	[[ -z $indexes ]] && echo "Couldn't find any references."
+	rules=$(/sbin/iptables -t nat -S POSTROUTING -w | grep $1 | cut -f 1 -d ' ' --complement)
+	if [[ -z "$rules" ]]; then
+		echo "Couldn't find any references."
+	else
+		while IFS= read -r rule; do
+			/sbin/iptables -t nat -D $rule -w
+    		echo "Removed: $rule"s
+		done <<< "$rules"
+	fi
+}
+
+listRule() {
+
 }
 
 if [[ $1 == "--remove" ]]; then
 	# quick validation
-	[[ -z $2 ]] && echo -e "Specify a server id or \"all\"" && exit
+	[[ -z $2 ]] && echo -e "Specify server id or \"all\"" && exit
 	
 	if [[ $2 == "all" ]]; then
 		removeRule ip-mapper
@@ -27,9 +33,15 @@ if [[ $1 == "--remove" ]]; then
 	fi
 	echo "Finished."
 	exit
+
+elif [[ $1 == "--list" ]]; then
+	# quick validation
+	[[ -z $2 ]] && echo -e "Specify server id or \"all\"" && exit
+	[[ $2 == "all" ]] && listRule ip-mapper || listRule $2
+	exit
 fi
 
-echo Listening for docker events... 
+echo "Listening for docker events..."
 docker events --filter type=container --format '{{.Status}} {{.Actor.Attributes.name}}' | while read event
 
 do
@@ -43,17 +55,16 @@ do
 		echo $(date)
 		echo -e "Status=$status\nServer_ID=$server_id\nLocal_IP=$local_ip\nPublic_IP=$public_ip"
 		echo "Action: Adding to NAT"
-		# sometimes docker is still holding the lock of xtables, so we use -w
-		# remove old rules with this comment just in case
+		echo "Trying to remove old rules just in case..."
 		removeRule $server_id
-		echo "Proceeding with the new rule..."
+		echo "Adding the new rule..."
 		
 		if [[ -z $public_ip ]]; then
 			echo "Missing environmental variable: SERVER_IP"
 			echo "Cannot be added to iptables!"
 		else
-			#add new rule 
-			iptables -t nat -I POSTROUTING -s $local_ip -j SNAT --to $public_ip -m comment --comment ip-mapper-$server_id -w
+			# add new rule 
+			/sbin/iptables -t nat -A POSTROUTING -s $local_ip -j SNAT --to $public_ip -m comment --comment ip-mapper-$server_id -w
 			echo "Finished."
 		fi
 		echo "========================================="
@@ -62,7 +73,7 @@ do
 		
 		echo "========================================="
 		echo $(date)
-		echo "server_id=$server_id"
+		echo -e "Status=$status\nServer_ID=$server_id"
 		echo "Action: Removing from NAT by Server ID"
 		removeRule $server_id
 		echo "Finished."
