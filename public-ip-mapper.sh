@@ -2,7 +2,7 @@
 # Solution to this problem: https://github.com/pterodactyl/panel/issues/459
 # Reference to iptables NAT tutorial: https://www.karlrupp.net/en/computer/nat_tutorial
 # 
-# Usage: bash public-ip-mapper.sh --remove <all|server_id>
+# Usage: bash public-ip-mapper.sh --remove <all|server_id> --list <all|server_id>
 # if you want to log the output: bash public-ip-mapper.sh 2>&1 | tee file.log
 
 removeRule() {
@@ -13,25 +13,27 @@ removeRule() {
 	else
 		while IFS= read -r rule; do
 			/sbin/iptables -t nat -D $rule -w
-    		echo "Removed: $rule"s
+    		echo "Removed: $rule"
 		done <<< "$rules"
 	fi
 }
 
 listRule() {
-
+	rules=$(/sbin/iptables -t nat -S POSTROUTING -w | grep $1 | cut -f 1 -d ' ' --complement)
+	if [[ -z "$rules" ]]; then
+		echo "Couldn't find any references."
+	else
+		while IFS= read -r rule; do
+			formattedRule=$(echo "$rule" | awk '{ $7 = substr($7, 11, 36); print $7" :: "$3" -> "$11; }')
+    		echo "$formattedRule"
+		done <<< "$rules"
+	fi
 }
 
 if [[ $1 == "--remove" ]]; then
 	# quick validation
 	[[ -z $2 ]] && echo -e "Specify server id or \"all\"" && exit
-	
-	if [[ $2 == "all" ]]; then
-		removeRule ip-mapper
-	else
-		removeRule $2
-	fi
-	echo "Finished."
+	[[ $2 == "all" ]] && removeRule ip-mapper || removeRule $2
 	exit
 
 elif [[ $1 == "--list" ]]; then
@@ -64,7 +66,7 @@ do
 			echo "Cannot be added to iptables!"
 		else
 			# add new rule 
-			/sbin/iptables -t nat -A POSTROUTING -s $local_ip -j SNAT --to $public_ip -m comment --comment ip-mapper-$server_id -w
+			/sbin/iptables -t nat -I POSTROUTING -s $local_ip -j SNAT --to $public_ip -m comment --comment ip-mapper-$server_id -w
 			echo "Finished."
 		fi
 		echo "========================================="

@@ -12,9 +12,10 @@ It basically solves [this](https://github.com/pterodactyl/panel/issues/459) prob
 **Usage:**
 
 ```
-sh public-ip-mapper.sh | Listens for docker events.
-sh public-ip-mapper.sh --remove all | Removes all rules added by the script.
-sh public-ip-mapper.sh --remove <server_id> | Removes rules added by the script for specific server.
+sh public-ip-mapper.sh # Listens for docker events.
+sh public-ip-mapper.sh [options]
+    --remove all | <server_id> # Removes rules added by the script.
+    --list all | <server_id> # Lists active rules added by the script.
 ```
 Example log output: `sh public-ip-mapper.sh 2>&1 | tee ip-mapper.log`
 
@@ -41,12 +42,12 @@ export PANEL_DIR="/var/www/pterodactyl"
 
 ```
 sh ptero-log.sh [options] 
-    --setup | Installs needed dependencies
-    --wings | Shows prettified & colored json of /srv/daemon/logs/wings.log
-    --request | Shows prettified & colored json of /srv/daemon/logs/request.log
-    --panel | Shows the latest log from PANEL_DIR/storage/logs
-    --installation <server_id> | Shows scrollable install log of server
-    --live | Updates the log live
+    --setup # Installs needed dependencies
+    --wings # Shows prettified & colored json of /srv/daemon/logs/wings.log
+    --request # Shows prettified & colored json of /srv/daemon/logs/request.log
+    --panel # Shows the latest log from PANEL_DIR/storage/logs
+    --installation <server_id> # Shows scrollable install log of server
+    --live # Updates the log live
 
 Note*: You can't use the arguments together! The only exception is --live as it can be combined with any of them.
 ```
