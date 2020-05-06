@@ -67,6 +67,7 @@ elif [[ -n "$installation" ]];then
     else
         cat "$DAEMON_DIR/config/servers/$installation/install.log" | less -R +G
     fi
+    
 elif [[ $panel == "y" ]];then
 
     # validate that the file exists
