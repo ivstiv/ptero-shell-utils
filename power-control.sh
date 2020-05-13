@@ -1,77 +1,64 @@
-sh power-control.sh --action start|stop|restart|kill --server <all | server_id>
-sh power-control.sh --action start|stop|restart|kill --user <nickname or email>
-sh power-control.sh --action start|stop|restart|kill --node <name or id | empty=prompt to choose>
+#!/bin/sh
 
-| jq -C . | less -R +G
+project_root=$(dirname "$(realpath "$0")")
+# shellcheck source=/dev/null
+. "$project_root/config.sh"
 
-pseudocode of the script
+# accepts parameter as starting page
+getAllServers() {
+    [ -z "$1" ] && page="1" || page="$1"
 
---server 
-    if all servers get them
-    curl "https://pterodactyl.app/api/application/servers" \
-        -H "Authorization: Bearer meowmeowmeow" \
+    data=$(curl -s "$PANEL_FQDN/api/application/servers?page=$page" \
+        -H "Authorization: Bearer $APP_API_KEY" \
         -H "Content-Type: application/json" \
         -H "Accept: Application/vnd.pterodactyl.v1+json" \
-        -X GET 
-    go through the pagination (replace the link with the link at the end of the response)
-    execute action
+        -X GET)
 
-    check if it exists
-    curl "https://pterodactyl.app/api/application/servers/<internal-id>" \
-        -H "Authorization: Bearer meowmeowmeow" \
-        -H "Content-Type: application/json" \
-        -H "Accept: Application/vnd.pterodactyl.v1+json" \
-        -X GET 
-    
-    execute action
-    curl "https://pterodactyl.app/api/client/servers/<id>/power" \
-        -H "Authorization: Bearer meowmeowmeow" \
-        -H "Content-Type: application/json" \
-        -H "Accept: Application/vnd.pterodactyl.v1+json" \
-        -X POST \
-        -d '{ "signal": "start" }'
+    echo "$data" | jq '.data[] | .attributes.uuid' --raw-output
+    # get the next page if it exists
+    nextPage=$(echo "$data" | jq '.meta.pagination | select(.current_page != .total_pages) | .links.next | split("=") | last' --raw-output)
 
---user
-    get all users
-    curl "https://pterodactyl.app/api/application/users" \
-        -H "Authorization: Bearer meowmeowmeow" \
-        -H "Content-Type: application/json" \
-        -H "Accept: Application/vnd.pterodactyl.v1+json" \
-        -X GET 
+    # recursive call
+    [ -n "$nextPage" ] && getAllServers "$nextPage"
+}
 
-    iterate the pagination until one of them matches username or email
-    get user id from response
+#accepts server-uuid and action
+executeAction() {
+    # if the user inputs the UUID we need only the first 8 characters
+    if [ "${#1}" -gt 8 ]; then
+        server_id=$(echo "$1" | cut -c 1-8)
+    else
+        server_id="$1"
+    fi
 
-    get all servers 
-    curl "https://pterodactyl.app/api/application/servers" \
-        -H "Authorization: Bearer meowmeowmeow" \
-        -H "Content-Type: application/json" \
-        -H "Accept: Application/vnd.pterodactyl.v1+json" \
-        -X GET 
-    iterate the pagination and find all servers that have a user with the same id
-    save the uuids of the servers
+    echo "Sending action \"$2\" to server $1..."
+    # REMOVE THIS AFTER TESTING
+    return
 
-    execute action on all of them
-    curl "https://pterodactyl.app/api/client/servers/<id>/power" \
-        -H "Authorization: Bearer meowmeowmeow" \
-        -H "Content-Type: application/json" \
-        -H "Accept: Application/vnd.pterodactyl.v1+json" \
-        -X POST \
-        -d '{ "signal": "start" }'
+    curl -s "$PANEL_FQDN/api/client/servers/$server_id/power" \
+            -H "Authorization: Bearer $CLIENT_API_KEY" \
+            -H "Content-Type: application/json" \
+            -H "Accept: Application/vnd.pterodactyl.v1+json" \
+            -X POST \
+            -d "{ \"signal\": \"$2\" }"
+}
 
---node 
-    get all nodes
-    curl "https://pterodactyl.app/api/application/nodes" \
-        -H "Authorization: Bearer meowmeowmeow" \
-        -H "Content-Type: application/json" \
-        -H "Accept: Application/vnd.pterodactyl.v1+json" \
-        -X GET 
+# accepts server_uuid
+isServerIDValid() {
+    # because searching for server info is done with internal id we will loop over all uuid..
+    # ugly but more user friendly..
+    [ -z "$1" ] && echo "Error: Please specify server UUID" && return
+    server_uuids=$(getAllServers)
+    echo "$(echo "$server_uuids" | grep -c "$1")"
+}
 
-    if argument is empty display names and ids
-    wait for input
-    find a node that matches id or name
-    save the id
+# test action on all servers
+#getAllServers | while IFS= read -r server_uuid; do
+#    executeAction "$server_uuid" "start"
+#done
 
-    get all servers
-    iterate the pagination and find all servers with the same node id
-    save them and execute action on them
+# testing validity of server uuid
+#isServerIDValid
+#isServerIDValid cd4a6769-dbd4-41eb-9c35-8c743b747a8b
+#isServerIDValid cd4a6769
+#isServerIDValid cd4a6769-dbd4-41eb-9c35-8c743b747a8g
