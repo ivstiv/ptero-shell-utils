@@ -30,6 +30,8 @@ Example of a systemd service:`not yet`
 ## ptero-log.sh<span></span>
 A utility for more readable logs from the panel and daemon.
 
+**Dependencies:** tailf, jq, less
+
 **Config requirements:**
 
 You will need to edit the following entries in **config.sh<span></span>** to suit your installation.
@@ -44,7 +46,6 @@ export PANEL_DIR="/var/www/pterodactyl"
 
 ```
 sh ptero-log.sh [options] 
-    --setup # Installs needed dependencies
     --wings # Shows prettified & colored json of /srv/daemon/logs/wings.log
     --request # Shows prettified & colored json of /srv/daemon/logs/request.log
     --panel # Shows the latest log from PANEL_DIR/storage/logs
