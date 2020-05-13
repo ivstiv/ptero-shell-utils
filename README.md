@@ -2,12 +2,14 @@
 This is a collection of scripts for automating different things related to the [Pterodactyl project](https://pterodactyl.io/). Ideally all of these scripts will not be needed in the future as the project develops but for now many problems and aspects remain outside the scope of development. Because of this I figured the community could benefit from such tools. Of course many of these scripts can be substituted by addons but the idea of this repository is to provide the community with easy alternatives that can be used alongside the panel and daemons without changing their code. If you have any problems or ideas feel free to contribute and help make them into a script.
 
 # Compatibility
-So far the scripts have been tested on the following distributions. It would be nice if you notify me with more information if you end up using them. 
+So far the scripts have been tested on the following distributions. It would be nice if you notify me with more information if you end up using them. I am trying to keep them POSIX compliant to ensure that there are no weird edge cases and of course to follow some form of standard to keep me sane. 
 
 | Script | Centos 7 | Centos 8 | Ubuntu 18.04 | Ubuntu 20.04 | Debian 9 | Debian 10|
 | :-: | :-: | :-: | :-: | :-: | :-: | :-: |
-| ip-mapper | ✅ | ⛔ | ❓ | ❓ | ❓ | ❓ | 
+| ip-mapper | ✅ | ⛔ | ❓ | ❓ | ❓ | ⛔ | 
 | ptero-log | ✅ | ❓ | ❓ | ❓ | ❓ | ❓ | 
+
+**Currently ip-mapper does not work with nftables, so consider this before using it on new-ish distributions.**
 
 # Scripts
 

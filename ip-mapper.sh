@@ -5,6 +5,8 @@
 # Usage: sh public-ip-mapper.sh --remove <all|server_id> --list <all|server_id>
 # if you want to log the output: sh public-ip-mapper.sh 2>&1 | tee file.log
 
+# TO-DO: Implement --nft argument for using nftables rules instead of iptables or write a new script
+
 removeRule() {
     echo "Removing rules from -t nat POSTROUTING: $1"
     rules=$(/sbin/iptables -t nat -S POSTROUTING -w | grep "$1" | cut -f 1 -d ' ' --complement)
