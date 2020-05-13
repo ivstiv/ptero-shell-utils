@@ -5,7 +5,7 @@ project_root=$(dirname "$(realpath "$0")")
 . "$project_root/config.sh"
 
 # set defaults 
-setup=n wings=n request=n panel=n installation='' live=n
+setup=n wings=n request=n panel=n installation='' live=n stats=n
 uniqueArguments=0
 
 # loop over the arguments
@@ -27,6 +27,9 @@ while [ -n "$1" ]; do
     elif [ "$1" = "--installation" ]; then
         shift
         installation="$1"
+        uniqueArguments=$(( uniqueArguments+1))
+    elif [ "$1" = "--stats" ]; then
+        stats=y
         uniqueArguments=$(( uniqueArguments+1))
     elif [ "$1" = "--live" ]; then
         live=y
@@ -84,4 +87,7 @@ elif [ "$panel" = "y" ];then
     else
         less +G "$PANEL_DIR/storage/logs/laravel-$(date '+%Y-%m-%d').log"
     fi
+
+elif [ "$stats" = "y" ];then
+    docker stats
 fi
