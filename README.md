@@ -62,6 +62,7 @@ sh ptero-log.sh [options]
     --installation <server_id> # Shows scrollable install log of server
     --stats # Shows container's resources usage
     --live # Updates the log live
+    --upload # Uploads the output to bin.ptdl.co (NOT IMPLEMENTED)
 
 Note*: You can't use the arguments together! The only exception is --live as it can be combined with any of them.
 ```
