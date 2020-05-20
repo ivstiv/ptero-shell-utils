@@ -8,6 +8,7 @@ So far the scripts have been tested on the following distributions. It would be 
 | :-: | :-: | :-: | :-: | :-: | :-: | :-: |
 | ip-mapper | ✅ | ⛔ | ❓ | ❓ | ❓ | ⛔ | 
 | ptero-log | ✅ | ❓ | ❓ | ❓ | ❓ | ❓ | 
+| power-control | ✅ | ❓ | ❓ | ❓ | ❓ | ❓ | 
 
 **Currently ip-mapper does not work with nftables, so consider this before using it on new-ish distributions.**
 
@@ -103,7 +104,9 @@ Note**: You can't execute multiple actions together!
 
 **Example with MOCK calls:**`sh power-control.sh --node --action restart --mock`
 
-**Stop all servers of a user:**`sh power-sontrol.sh --user user1234 --action stop --force`
+**Stop all servers of a user:**`sh power-sontrol.sh --user user1234 --action stop`
+
+**Kill all servers (be careful):**`sh power-sontrol.sh --server all --action kill`
 
 ## transfer-server.sh<span></span>
 One command solution to transferring servers between nodes!
