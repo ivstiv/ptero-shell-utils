@@ -117,10 +117,13 @@ executeAction() {
         server_id="$1"
     fi
 
-    echo "Sending action \"$2\" to server $1..."
-    # REMOVE THIS AFTER TESTING
-    return
-
+    if [ "$mock" = "y" ]; then
+        echo "Sending mock action \"$2\" to server $1..."
+        return
+    else
+        echo "Sending action \"$2\" to server $1..."
+    fi
+    
     curl -s "$PANEL_FQDN/api/client/servers/$server_id/power" \
             -H "Authorization: Bearer $CLIENT_API_KEY" \
             -H "Content-Type: application/json" \
@@ -183,7 +186,7 @@ isActionValid() {
 ######################
 
 # set defaults 
-server='' user='' node='' action='' force='n'
+server='' user='' node='' action='' force='n' mock="n"
 uniqueArguments=0
 
 # loop over the arguments
@@ -213,9 +216,8 @@ while [ -n "$1" ]; do
 
     elif [ "$1" = "--node" ]; then
         uniqueArguments=$((uniqueArguments+1))
-        shift
         # if the user doesn't know the node ids let him choose
-        if [ -z "$1" ]; then
+        if case "$2" in "--"*) true;; *) false;; esac; then
             getAllNodes
             printf "Please choose Node ID >>"
             read -r nodeID
@@ -226,6 +228,7 @@ while [ -n "$1" ]; do
             fi
         # if he knows the id just validate it
         else
+            shift
             if [ "$(isNodeIDValid "$1")" -eq 1 ]; then
             node="$1"
             else
@@ -243,6 +246,9 @@ while [ -n "$1" ]; do
 
     elif [ "$1" = "--force" ]; then
         force=y
+
+    elif [ "$1" = "--mock" ]; then
+        mock=y
     else 
         echo "Invalid argument: $1" && exit
     fi
@@ -262,6 +268,7 @@ echo "THE FOLLOWING ACTION WILL BE EXECUTED:"
 [ -n "$user" ] && echo "  - All servers of user: $user"
 [ -n "$node" ] && echo "  - All servers on node: $node"
 echo "  - Action: $action"
+[ "$mock" = "y" ] && echo "  - WARNING: You are running in mock mode which means that no actions will be actually executed! ! !"
 
 if [ "$force" = "n" ]; then
     while true; do
@@ -275,11 +282,32 @@ if [ "$force" = "n" ]; then
     done
 fi
 
-echo "EXECUTING"
+echo "Executing..."
+
+if [ -n "$server" ]; then
+    if [ "$server" = "all" ]; then
+        getAllServers | while IFS= read -r server_uuid; do
+            executeAction "$server_uuid" "$action"
+        done
+    else
+        executeAction "$server" "$action"
+    fi
+elif [ -n "$user" ]; then
+    getServersByUsername "$user" | while IFS= read -r server_uuid; do
+        executeAction "$server_uuid" "$action"
+    done
+elif [ -n "$node" ]; then
+    getServersByNodeID "$node" | while IFS= read -r server_uuid; do
+        executeAction "$server_uuid" "$action"
+    done
+fi
 
 ##############
 # TEST CASES #
 ##############
+
+# I am leaving all of this here so that if you want to debug a function
+# this would be the expected behaviour of the core functions.
 
 # test action on all servers
 #getAllServers | while IFS= read -r server_uuid; do
@@ -288,10 +316,10 @@ echo "EXECUTING"
 
 # testing validity of server uuid
 #isServerIDValid # no parameter -> error
-#isServerIDValid 7db48acc-9d54-4c0a-925e-8fa9fc90a2c2 # valid id -> 1
-#isServerIDValid 7db48acc # valid short id -> 1
-#isServerIDValid 7db48acc-9d54-4c0a-925e-8fa9fc90a2cg # invalid id -> 0
-#isServerIDValid cc # invalid id but containing chars from another id -> 0
+#isServerIDValid 7db48acc-9d54-4c0a-925e-8fa9fc90a2c2 # valid uuid -> 1
+#isServerIDValid 7db48acc # valid short uuid -> 1
+#isServerIDValid 7db48acc-9d54-4c0a-925e-8fa9fc90a2cg # invalid uuid -> 0
+#isServerIDValid cc # invalid uuid but containing chars from another uuid -> 0
 
 # testing validity of node id
 #isNodeIDValid 32 # valid id -> 1

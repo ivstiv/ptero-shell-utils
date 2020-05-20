@@ -71,6 +71,40 @@ Note*: You can't use the arguments together! The only exception is --live as it 
 
 **Example2:**`sh ptero-log.sh --installation e13df76a-7b62-4dab-a427-6c959e5da36d --live`
 
+## power-control.sh<span></span>
+Send power commands to groups of servers based on node, owner or server UUID.
+
+**Dependencies:** jq, grep, awk, curl
+
+**Config requirements:**
+
+You will need to edit the following entries in **config.sh<span></span>** to suit your installation. Note that the script needs 2 api keys, one from the application and one from an admin user because of certain limitations of the [Pterodactyl's API](https://dashflo.net/docs/api/pterodactyl/v0.7/#introduction).
+```
+# [global]
+export APP_API_KEY="Add application api key here."
+export CLIENT_API_KEY="Add admin user api key here."
+export PANEL_FQDN="https://Add the FQDN of your panel here."
+```
+
+**Usage:**
+
+```
+sh power-control.sh [options] 
+    --server <UUID | all> # Selects a particular server or all of them
+    --user <username> # Selects all servers of that user
+    --node <id | empty=prompt to choose> # Selects all servers on that node
+    --action <start | stop | restart | kill> # Specifies the action to be executed
+    --mock # This can be used to test the script without actually sending actions
+    --force # Force the execution without a confirmation prompt
+
+Note*: You can't group multiple selector arguments together!
+Note**: You can't execute multiple actions together!
+```
+
+**Example with MOCK calls:**`sh power-control.sh --node --action restart --mock`
+
+**Stop all servers of a user:**`sh power-sontrol.sh --user user1234 --action stop --force`
+
 ## transfer-server.sh<span></span>
 One command solution to transferring servers between nodes!
 
@@ -79,9 +113,6 @@ This script aims to ease the backup process of the daemon data by providing opti
 
 ## restore-server.sh<span></span>
 If used alongside the backup script above admins can easily restore servers to specified date.
-
-## power-control.sh<span></span>
-Send power commands to groups of servers based on node, owner or ID.
 
 # Contact and contribution
 If you have issues, ideas or want to contribute you can [join my discord server](https://discord.gg/VMSDGVD) to have a chat and explain your situation. :)
