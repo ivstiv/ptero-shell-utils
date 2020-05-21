@@ -4,6 +4,18 @@ project_root=$(dirname "$(realpath "$0")")
 # shellcheck source=/dev/null
 . "$project_root/config.sh"
 
+checkDependencies() {
+    mainShellPID="$$"
+    printf "jq\ntailf\nless" | while IFS= read -r program; do
+        if ! [ -x "$(command -v "$program")" ]; then
+            echo "Error: $program is not installed." >&2
+            kill -9 "$mainShellPID" 
+        fi
+    done
+}
+
+checkDependencies
+
 # set defaults 
 setup=n wings=n request=n panel=n installation='' live=n stats=n
 uniqueArguments=0

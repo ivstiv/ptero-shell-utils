@@ -33,6 +33,18 @@ listRule() {
     fi
 }
 
+checkDependencies() {
+    mainShellPID="$$"
+    printf "docker\ngrep\nawk\niptables\ncut" | while IFS= read -r program; do
+        if ! [ -x "$(command -v "$program")" ]; then
+            echo "Error: $program is not installed." >&2
+            kill -9 "$mainShellPID" 
+        fi
+    done
+}
+
+checkDependencies
+
 if [ "$1" = "--remove" ]; then
     # quick validation
     [ -z "$2" ] && echo 'Specify server id or "all"' && exit

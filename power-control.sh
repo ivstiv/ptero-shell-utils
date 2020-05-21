@@ -24,7 +24,7 @@ getAllServers() {
 
 # accepts node ID and starting page
 getServersByNodeID() {
-    [ -z "$1" ] && echo "Error: Please specify node ID" && return
+    [ -z "$1" ] && echo "Error: Please specify node ID" >&2 && return
     [ -z "$2" ] && page="1" || page="$2"
 
     data=$(curl -s "$PANEL_FQDN/api/application/servers?page=$page" \
@@ -43,7 +43,7 @@ getServersByNodeID() {
 
 # accepts userID and starting page
 getServersByUserID() {
-    [ -z "$1" ] && echo "Error: Please specify user id" && return
+    [ -z "$1" ] && echo "Error: Please specify user id" >&2 && return
     [ -z "$2" ] && page="1" || page="$2"
 
     data=$(curl -s "$PANEL_FQDN/api/application/servers?page=$page" \
@@ -63,7 +63,7 @@ getServersByUserID() {
 # accepts username
 # the function assumes that the username is validated with isUsernameValid() !!!
 getServersByUsername() {
-    [ -z "$1" ] && echo "Error: Please specify username" && return
+    [ -z "$1" ] && echo "Error: Please specify username" >&2 && return
     # find the corresponding id to search for servers 
     userID=$(usernameToUserID "$1")
     getServersByUserID "$userID" 
@@ -134,7 +134,7 @@ executeAction() {
 
 # accepts username and starting page
 usernameToUserID() {
-    [ -z "$1" ] && echo "Error: Please specify username" && return
+    [ -z "$1" ] && echo "Error: Please specify username" >&2 && return
     [ -z "$2" ] && page="1" || page="$2"
 
     data=$(curl -s "$PANEL_FQDN/api/application/users?page=$page" \
@@ -156,22 +156,22 @@ usernameToUserID() {
 isServerIDValid() {
     # because searching for server info is done with internal id we will loop over all uuid..
     # ugly but more user friendly..
-    [ -z "$1" ] && echo "Error: Please specify server UUID" && return
-    [ "${#1}" -lt 8 ] && echo "Error: Invalid format of server UUID" && return
+    [ -z "$1" ] && echo "Error: Please specify server UUID" >&2 && return
+    [ "${#1}" -lt 8 ] && echo "Error: Invalid format of server UUID" >&2 && return
     server_uuids=$(getAllServers)
     echo "$server_uuids" | grep -c "$1"
 }
 
 # accepts node ID
 isNodeIDValid() {
-    [ -z "$1" ] && echo "Error: Please specify Node ID" && return
+    [ -z "$1" ] && echo "Error: Please specify Node ID" >&2 && return
     nodes=$(getAllNodes)
     echo "$nodes" | awk '{print $1}' | grep -cE "(^|\s)$1($|\s)"
 }
 
 # accepts username
 isUsernameValid() {
-    [ -z "$1" ] && echo "Error: Please specify username" && return
+    [ -z "$1" ] && echo "Error: Please specify username" >&2 && return
     users=$(getAllUsers)
     echo "$users" | grep -cE "(^|\s)$1($|\s)"
 }
@@ -181,9 +181,22 @@ isActionValid() {
     printf "start\nstop\nrestart\nkill" | grep -cE "(^|\s)$1($|\s)"
 }
 
+checkDependencies() {
+    mainShellPID="$$"
+    printf "jq\ngrep\nawk\ncurl" | while IFS= read -r program; do
+        if ! [ -x "$(command -v "$program")" ]; then
+            echo "Error: $program is not installed." >&2
+            kill -9 "$mainShellPID" 
+        fi
+    done
+}
+
+
 ######################
 # VALIDATE ARGUMENTS #
 ######################
+
+checkDependencies
 
 # set defaults 
 server='' user='' node='' action='' force='n' mock="n"
@@ -202,7 +215,7 @@ while [ -n "$1" ]; do
         elif [ "$(isServerIDValid "$1")" -eq 1 ]; then
             server="$1"
         else
-            echo "Error: Invalid server UUID $1" && exit
+            echo "Error: Invalid server UUID $1" >&2 && exit
         fi
 
     elif [ "$1" = "--user" ]; then
@@ -211,7 +224,7 @@ while [ -n "$1" ]; do
         if [ "$(isUsernameValid "$1")" -eq 1 ]; then
             user="$1"
         else
-            echo "Error: Invalid username $1" && exit
+            echo "Error: Invalid username $1" >&2 && exit
         fi
 
     elif [ "$1" = "--node" ]; then
@@ -224,7 +237,7 @@ while [ -n "$1" ]; do
             if [ "$(isNodeIDValid "$nodeID")" -eq 1 ]; then
             node="$nodeID"
             else
-                echo "Error: Invalid node ID $nodeID" && exit
+                echo "Error: Invalid node ID $nodeID" >&2 && exit
             fi
         # if he knows the id just validate it
         else
@@ -232,7 +245,7 @@ while [ -n "$1" ]; do
             if [ "$(isNodeIDValid "$1")" -eq 1 ]; then
             node="$1"
             else
-                echo "Error: Invalid node ID $1" && exit
+                echo "Error: Invalid node ID $1" >&2 && exit
             fi
         fi
 
@@ -241,7 +254,7 @@ while [ -n "$1" ]; do
         if [ "$(isActionValid "$1")" -eq 1 ]; then
             action="$1"
         else 
-            echo "Error: Invalid action $1" && exit
+            echo "Error: Invalid action $1" >&2 && exit
         fi
 
     elif [ "$1" = "--force" ]; then
@@ -255,9 +268,9 @@ while [ -n "$1" ]; do
     shift
 done
 
-[ "$uniqueArguments" -eq 0 ] && echo "Error: You need to choose either --server, --user or --node but not together!" && exit
-[ "$uniqueArguments" -gt 1 ] && echo "Error: You need to choose either --server, --user or --node but not together!" && exit
-[ -z "$action" ] && echo "Error: You must specify an action." && exit
+[ "$uniqueArguments" -eq 0 ] && echo "Error: You need to choose either --server, --user or --node but not together!" >&2 && exit
+[ "$uniqueArguments" -gt 1 ] && echo "Error: You need to choose either --server, --user or --node but not together!" >&2 && exit
+[ -z "$action" ] && echo "Error: You must specify an action." >&2 && exit
 
 ####################
 # HANDLE THE QUERY #
