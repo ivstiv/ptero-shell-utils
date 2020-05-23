@@ -6,9 +6,9 @@ So far the scripts have been tested on the following distributions. It would be 
 
 | Script | Centos 7 | Centos 8 | Ubuntu 18.04 | Ubuntu 20.04 | Debian 9 | Debian 10|
 | :-: | :-: | :-: | :-: | :-: | :-: | :-: |
-| ip-mapper | ✅ | ⛔ | ❓ | ❓ | ❓ | ⛔ | 
-| ptero-log | ✅ | ❓ | ❓ | ❓ | ❓ | ❓ | 
-| power-control | ✅ | ❓ | ❓ | ❓ | ❓ | ❓ | 
+| ip-mapper | ✅ | ⛔ | ✅ | ❓ | ❓ | ⛔ | 
+| ptero-log | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 
+| power-control | ✅ | ✅ | ❓ | ❓ | ❓ | ❓ | 
 
 **Currently ip-mapper does not work with nftables, so consider this before using it on new-ish distributions.**
 
@@ -23,6 +23,8 @@ It basically solves [this](https://github.com/pterodactyl/panel/issues/459) prob
 **Config requirements:** None
 
 **Usage:**
+
+This script needs to run constantly in the background in order to keep the IPs updated.
 
 ```
 sh ip-mapper.sh # Listens for docker events.
@@ -79,7 +81,7 @@ Send power commands to groups of servers based on node, owner or server UUID.
 
 **Config requirements:**
 
-You will need to edit the following entries in **config.sh<span></span>** to suit your installation. Note that the script needs 2 api keys, one from the application and one from an admin user because of certain limitations of the [Pterodactyl's API](https://dashflo.net/docs/api/pterodactyl/v0.7/#introduction).
+You will need to edit the following entries in **config.sh<span></span>** to suit your installation. Note that the script needs 2 api keys, one from the application and one from an admin user because of certain limitations of the [Pterodactyl's API](https://dashflo.net/docs/api/pterodactyl/v0.7/#introduction). If you don't know how to obtain the two keys [here is a tutorial](https://github.com/Ivstiv/ptero-shell-utils/wiki/Setting-API-keys-in-the-config) that explains the process.
 ```
 # [global]
 export APP_API_KEY="Add application api key here."
