@@ -43,6 +43,11 @@ checkDependencies() {
     done
 }
 
+if  [ -x "$(command -v nft)" ]; then
+            echo "Error: Your system works with nftables which is incopatible with this script! Please use ip-mapper-nft.sh instead." >&2
+            exit
+ fi
+
 checkDependencies
 
 if [ "$1" = "--remove" ]; then
