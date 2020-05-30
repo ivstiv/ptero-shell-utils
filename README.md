@@ -9,6 +9,7 @@ So far the scripts have been tested on the following distributions. It would be 
 | ip-mapper | ✅ | ✅ | ✅ | ❓ | ❓ | ❓ | 
 | ptero-log | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 
 | power-control | ✅ | ✅ | ❓ | ❓ | ❓ | ❓ | 
+| backup-server | ✅ | ✅ | ❓ | ❓ | ❓ | ❓ | 
 
 **There are 2 scripts ip-mapper and ip-mapper-nft for wider compatibility. Always use ip-mapper and it will tell you if you need to use the nft version if needed. This is due to newer systems shipping with nft instead of iptables or a combination of both.**
 
@@ -110,11 +111,55 @@ Note**: You can't execute multiple actions together!
 
 **Kill all servers (be careful):**`sh power-sontrol.sh --server all --action kill`
 
+## backup-server.sh<span></span>
+This script aims to ease the backup process of the servers' data by providing options for remote and local backups. You can leave it
+running daily in crontab to fully automate the process. 
+
+**Dependencies:** lftp, tar, curl, find
+
+**Config requirements:**
+
+You will need to edit the following entries in **config.sh<span></span>** to suit your installation. A lot of the variabels can also be
+specified as command arguments which is explained under **Usage** so you don't need to populate all of these in the config. 
+```
+# [global]
+export DAEMON_DATA_DIR="/srv/daemon-data"
+
+# [backup-server & restore-server]
+export BACKUP_DESTINATION="/pterodactyl-backups"
+export BACKUP_EXPIRATION="1 week"
+export DISCORD_WEBHOOK=""
+export DISCORD_BACKUP_NAME="[NODE] Example"
+export DISCORD_BACKUP_MSG="Pterodactyl backups finished!"
+export FTP_HOST=""
+export FTP_USER=""
+export FTP_PASS=""
+# For adjusting your transfer speeds consult LFTP's manual: https://lftp.yar.ru/lftp-man.html
+# 0 means unlimited
+export TRANSFER_RATE_DOWNLOAD="0"
+export TRANSFER_RATE_UPLOAD="0"
+export TRANSFER_CONNECTIONS="0" 
+```
+
+**Usage:**
+```
+sh backup-server.sh [options]
+    --server <uuid | all> 
+    --origin <path || DAEMON_DATA_DIR> 
+    --destination <destination || BACKUP_DESTINATION>
+    --host <host || FTP_HOST>
+    --user <user || FTP_USER>
+    --pass <pass || FTP_PASS>
+
+Note*: The variables in CAPS come from config.sh and they will replace the argument if it has not been explicitly specified!
+```
+
+**Example backup all servers with populated config:**`sh backup-server.sh --server e13df76a-7b62-4dab-a427-6c959e5da36d`
+
+**Daily backups in crontab:**`0 0 * * * sh backup-server.sh --server all`
+
 ## transfer-server.sh<span></span>
 One command solution to transferring servers between nodes!
-
-## backup-server.sh<span></span>
-This script aims to ease the backup process of the daemon data by providing options for remote and local backups.
 
 ## restore-server.sh<span></span>
 If used alongside the backup script above admins can easily restore servers to specified date.
