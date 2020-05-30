@@ -119,7 +119,7 @@ running daily in crontab to fully automate the process.
 
 **Config requirements:**
 
-You will need to edit the following entries in **config.sh<span></span>** to suit your installation. A lot of the variabels can also be
+You will need to edit the following entries in **config.sh<span></span>** to suit your installation. A lot of the variables can also be
 specified as command arguments which is explained under **Usage** so you don't need to populate all of these in the config. 
 ```
 # [global]
@@ -154,9 +154,9 @@ sh backup-server.sh [options]
 Note*: The variables in CAPS come from config.sh and they will replace the argument if it has not been explicitly specified!
 ```
 
-**Example backup all servers with populated config:**`sh backup-server.sh --server e13df76a-7b62-4dab-a427-6c959e5da36d`
+**Example of backup with single server with populated config:**`sh backup-server.sh --server e13df76a-7b62-4dab-a427-6c959e5da36d`
 
-**Daily backups in crontab:**`0 0 * * * sh backup-server.sh --server all`
+**Daily backups in crontab:**`0 0 * * * screen -dmS pterodactyl-backups sh backup-server.sh --server all`
 
 ## transfer-server.sh<span></span>
 One command solution to transferring servers between nodes!
