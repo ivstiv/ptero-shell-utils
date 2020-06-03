@@ -6,15 +6,17 @@ So far the scripts have been tested on the following distributions. It would be 
 
 | Script | Centos 7 | Centos 8 | Ubuntu 18.04 | Ubuntu 20.04 | Debian 9 | Debian 10|
 | :-: | :-: | :-: | :-: | :-: | :-: | :-: |
-| ip-mapper | ✅ | ✅ | ✅ | ❓ | ❓ | ❓ | 
-| ptero-log | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 
-| power-control | ✅ | ✅ | ❓ | ❓ | ❓ | ❓ | 
-| backup-server | ✅ | ✅ | ❓ | ❓ | ❓ | ❓ | 
-| restore-server | ✅ | ✅ | ❓ | ❓ | ❓ | ❓ | 
+| [ip-mapper](## ip-mapper.sh) | ✅ | ✅ | ✅ | ❓ | ❓ | ❓ | 
+| [ptero-log](## ptero-log.sh) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 
+| [power-control](## power-control.sh) | ✅ | ✅ | ❓ | ❓ | ❓ | ❓ | 
+| [backup-server](## backup-server.sh) | ✅ | ✅ | ❓ | ❓ | ❓ | ❓ | 
+| [restore-server](## restore-server.sh) | ✅ | ✅ | ❓ | ❓ | ❓ | ❓ | 
 
 **There are 2 scripts ip-mapper and ip-mapper-nft for wider compatibility. Always use ip-mapper and it will tell you if you need to use the nft version if needed. This is due to newer systems shipping with nft instead of iptables or a combination of both.**
 
 # Scripts
+
+Go to
 
 ## ip-mapper.sh<span></span>
 
@@ -193,6 +195,7 @@ Note**: The script requires root permissions in order to grant ownership of the 
 ```
 
 **Example:**`sh restore-server.sh --server e13df76a-7b62-4dab-a427-6c959e5da36d`
+
 **Example without restoration:**`sh restore-server.sh --server e13df76a-7b62-4dab-a427-6c959e5da36d --download-only`
 
 ## transfer-server.sh<span></span>
