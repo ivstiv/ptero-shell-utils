@@ -22,9 +22,9 @@ checkDependencies() {
 checkDependencies
 
 
-######################
-# VALIDATE ARGUMENTS #
-######################
+####################
+# VALIDATE ARGUMENTS  #
+####################
 
 # set defaults 
 server='' origin='' destination='' host='' user='' pass='' isLocalBackup='n'
@@ -63,9 +63,9 @@ while [ -n "$1" ]; do
 done
 
 
-######################
-# SANITISE VARIABLES #
-######################
+##################
+# SANITISE VARIABLES  #
+##################
 
 # if server is not specified abort
 [ -z "$server" ] && printf "Error: Please specify a server or \"all\"\n" >&2 && exit
@@ -88,9 +88,9 @@ elif [ -z "$host" ] || [ -z "$user" ] || [ -z "$pass" ]; then
 fi
 
 
-###################
-# PREPARE FOLDERS #
-###################
+#################
+# PREPARE FOLDERS   #
+#################
 
 echo "Removing old backup folder: $destination/BACKUPS-$DATE_DELETE"
 echo "Creating new backup folder: $destination/BACKUPS-$DATE_CREATE"
@@ -106,20 +106,22 @@ else
 fi
 
 
-##################
+################
 # BACKUP PROCESS #
-##################
+################
 
+# otherwise the backups will have full names
+cd "$origin" || exit
 if [ "$server" = "all" ]; then
     # can't use "for d in */"" because of posix.. :D 
     find "$origin" -maxdepth 1 -mindepth 1 -not -path '*/\.*' -type d -printf '%f\n' | while IFS= read -r dir; do
 
         if [ "$isLocalBackup" = "y" ]; then
             echo "Compressing: $origin/$dir"
-            tar -czf "$destination/BACKUPS-$DATE_CREATE/${dir}${BACKUP_SUFFIX}" "$origin/$dir";
+            tar -czf "$destination/BACKUPS-$DATE_CREATE/${dir}${BACKUP_SUFFIX}" "$dir";
         else
             echo "Compressing: $origin/$dir"
-            tar -czf "${dir}${BACKUP_SUFFIX}" "$origin/$dir";
+            tar -czf "${dir}${BACKUP_SUFFIX}" "$dir";
             echo "Uploading: ${dir}${BACKUP_SUFFIX}"
             lftp -c "open -u $user,$pass $host;
                         set ftp:ssl-allow no;
@@ -134,10 +136,10 @@ else
     # backup only the specified server
     if [ "$isLocalBackup" = "y" ]; then
         echo "Compressing: $origin/$server"
-        tar -czf "$destination/BACKUPS-$DATE_CREATE/${server}${BACKUP_SUFFIX}" "$origin/$server";
+        tar -czf "$destination/BACKUPS-$DATE_CREATE/${server}${BACKUP_SUFFIX}" "$server";
     else
         echo "Compressing: $origin/$server"
-        tar -czf "${server}${BACKUP_SUFFIX}" "$origin/$server";
+        tar -czf "${server}${BACKUP_SUFFIX}" "$server";
         echo "Uploading: ${server}${BACKUP_SUFFIX}"
         lftp -c "open -u $user,$pass $host;
                     set ftp:ssl-allow no;
@@ -149,9 +151,9 @@ else
 fi
 
 
-########################
-# DISCORD NOTIFICATION #
-########################
+#####################
+# DISCORD NOTIFICATION  #
+#####################
 if [ -n "$DISCORD_WEBHOOK" ]; then
     curl -H "Content-Type: application/json" -X POST -d "{\"username\": \"$DISCORD_BACKUP_NAME\", \"embeds\": [{\"title\": \"$DISCORD_BACKUP_MSG\"}]}" "$DISCORD_WEBHOOK"
 fi

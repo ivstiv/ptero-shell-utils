@@ -144,14 +144,15 @@ export TRANSFER_CONNECTIONS="0"
 **Usage:**
 ```
 sh backup-server.sh [options]
-    --server <uuid | all> 
-    --origin <path || DAEMON_DATA_DIR> 
-    --destination <destination || BACKUP_DESTINATION>
-    --host <host || FTP_HOST>
-    --user <user || FTP_USER>
-    --pass <pass || FTP_PASS>
+    --server <uuid | all>   # Selects a particular server or all of them
+    --origin <path || DAEMON_DATA_DIR>  # Selects the root folder of the servers' data
+    --destination <destination || BACKUP_DESTINATION>   # Selects the destination folder of the backup
+    --host <host || FTP_HOST>   # FTP credentials
+    --user <user || FTP_USER>    # FTP credentials
+    --pass <pass || FTP_PASS>   # FTP credentials
 
 Note*: The variables in CAPS come from config.sh and they will replace the argument if it has not been explicitly specified!
+Note**: If you don't have FTP credentials defined anywhere it will perform a local backup to the specified directory.
 ```
 
 **Example of backup with single server with populated config:**`sh backup-server.sh --server e13df76a-7b62-4dab-a427-6c959e5da36d`
