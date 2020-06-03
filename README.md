@@ -10,6 +10,7 @@ So far the scripts have been tested on the following distributions. It would be 
 | ptero-log | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 
 | power-control | ✅ | ✅ | ❓ | ❓ | ❓ | ❓ | 
 | backup-server | ✅ | ✅ | ❓ | ❓ | ❓ | ❓ | 
+| restore-server | ✅ | ✅ | ❓ | ❓ | ❓ | ❓ | 
 
 **There are 2 scripts ip-mapper and ip-mapper-nft for wider compatibility. Always use ip-mapper and it will tell you if you need to use the nft version if needed. This is due to newer systems shipping with nft instead of iptables or a combination of both.**
 
@@ -119,8 +120,7 @@ running daily in crontab to fully automate the process.
 
 **Config requirements:**
 
-You will need to edit the following entries in **config.sh<span></span>** to suit your installation. A lot of the variables can also be
-specified as command arguments which is explained under **Usage** so you don't need to populate all of these in the config. 
+You will need to edit the following entries in **config.sh<span></span>** to suit your installation. A lot of the variables can also be specified as command arguments which is explained under **Usage** so you don't need to populate all of these in the config. 
 ```
 # [global]
 export DAEMON_DATA_DIR="/srv/daemon-data"
@@ -159,11 +159,44 @@ Note**: If you don't have FTP credentials defined anywhere it will perform a loc
 
 **Daily backups in crontab:**`0 0 * * * screen -dmS pterodactyl-backups sh backup-server.sh --server all`
 
+## restore-server.sh<span></span>
+If used alongside the backup script above admins can easily restore servers to specified date. The script will delete the server's data and download then decompress a backup into the corresponding directory. It might be a good idea to run this script
+in a tmux, screen session to be able to detach from it while the backups download. Due to their size they can take pretty long time!
+
+**Dependencies:** lftp, tar, find, grep
+
+**Config requirements:**
+
+You will need to edit the following entries in **config.sh<span></span>** to suit your installation. A lot of the variables can also be specified as command arguments which is explained under **Usage** so you don't need to populate all of these in the config. 
+```
+# [global]
+export DAEMON_DATA_DIR="/srv/daemon-data"
+
+# [backup-server & restore-server]
+export BACKUP_DESTINATION="/pterodactyl-backups"
+export FTP_HOST=""
+export FTP_USER=""
+export FTP_PASS=""
+```
+
+**Usage:**
+```
+sh restore-server.sh [options]
+    --server <uuid> # Selects a particular server
+    --backups-location <path || BACKUP_DESTINATION> # The directory of the backups
+    --daemon-data <path || DAEMON_DATA_DIR> # The directory where all servers are
+    --local # Tells the script to restore from a local directory
+    --download-only # Only downloads the backup
+
+Note*: The script looks for defined FTP credentials in the config.
+Note**: The script requires root permissions in order to grant ownership of the files to the deamon. 
+```
+
+**Example:**`sh restore-server.sh --server e13df76a-7b62-4dab-a427-6c959e5da36d`
+**Example without restoration:**`sh restore-server.sh --server e13df76a-7b62-4dab-a427-6c959e5da36d --download-only`
+
 ## transfer-server.sh<span></span>
 One command solution to transferring servers between nodes!
-
-## restore-server.sh<span></span>
-If used alongside the backup script above admins can easily restore servers to specified date.
 
 # Contact and contribution
 If you have issues, ideas or want to contribute you can [join my discord server](https://discord.gg/VMSDGVD) to have a chat and explain your situation. :)
