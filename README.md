@@ -6,11 +6,11 @@ So far the scripts have been tested on the following distributions. It would be 
 
 | Script | Centos 7 | Centos 8 | Ubuntu 18.04 | Ubuntu 20.04 | Debian 9 | Debian 10|
 | :-: | :-: | :-: | :-: | :-: | :-: | :-: |
-| [ip-mapper](##ip-mapper.sh) | ✅ | ✅ | ✅ | ❓ | ❓ | ❓ | 
-| [ptero-log](##ptero-log.sh) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 
-| [power-control](##power-control.sh) | ✅ | ✅ | ❓ | ❓ | ❓ | ❓ | 
-| [backup-server](##backup-server.sh) | ✅ | ✅ | ❓ | ❓ | ❓ | ❓ | 
-| [restore-server](##restore-server.sh) | ✅ | ✅ | ❓ | ❓ | ❓ | ❓ | 
+| [ip-mapper](##-ip-mapper.sh<span></span>) | ✅ | ✅ | ✅ | ❓ | ❓ | ❓ | 
+| [ptero-log](##-ptero-log.sh<span></span>) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 
+| [power-control](##-power-control.sh<span></span>) | ✅ | ✅ | ❓ | ❓ | ❓ | ❓ | 
+| [backup-server](##-backup-server.sh<span></span>) | ✅ | ✅ | ❓ | ❓ | ❓ | ❓ | 
+| [restore-server](##-restore-server.sh<span></span>) | ✅ | ✅ | ❓ | ❓ | ❓ | ❓ | 
 
 **There are 2 scripts ip-mapper and ip-mapper-nft for wider compatibility. Always use ip-mapper and it will tell you if you need to use the nft version if needed. This is due to newer systems shipping with nft instead of iptables or a combination of both.**
 
