@@ -11,6 +11,7 @@ So far the scripts have been tested on the following distributions. It would be 
 | [power-control](#power-controlsh) | ✅ | ✅ | ❓ | ❓ | ❓ | ❓ | 
 | [backup-server](#backup-serversh) | ✅ | ✅ | ❓ | ❓ | ❓ | ❓ | 
 | [restore-server](#restore-serversh) | ✅ | ✅ | ❓ | ❓ | ❓ | ❓ | 
+| [transfer-server](#transfer-serversh) | ✅ | ✅ | ❓ | ❓ | ❓ | ❓ | 
 
 **There are 2 scripts ip-mapper and ip-mapper-nft for wider compatibility. Always use ip-mapper and it will tell you if you need to use the nft version if needed. This is due to newer systems shipping with nft instead of iptables or a combination of both.**
 
@@ -197,7 +198,29 @@ Note**: The script requires root permissions in order to grant ownership of the 
 **Example without restoration:**`sh restore-server.sh --server e13df76a-7b62-4dab-a427-6c959e5da36d --download-only`
 
 ## transfer-server.sh<span></span>
-One command solution to transferring servers between nodes!
+Can be used as a general guide for transferring servers. The server is not actually moved but a new one is created on the specified node which has the same options as the old server. **The old server is only being suspended and deletion should be done through the panel to prevent data loss due to malfunction of the script.** The script also facilitates the file transfer between the servers which could take VERY long time so **it is best to run this script in screen or tmux session** to detach from it once the file transfer starts. The script also gives you the opportunity to move the files manually and exit without waiting for them. The main limitations of the script are that it does not take care of subusers, additional allocations and databases linked to the old server. These need to be manually added to the new copy since there is no easy way to interface with them through the API.
+Do mind that some game servers such as FiveM have particularly complex file structure and permissions that will probably get lost or partially transferred. It might be better to select the manual transfer for them and it will generate you commands for archiving and extracting the data. All you need to do is move the archive from one node to another. 
+
+**Dependencies:** curl, jq, awk, grep, cut, sshpass, sftp, ssh-keyscan
+
+**Config requirements:**
+
+You will need to edit the following entries in **config.sh<span></span>** to suit your installation. 
+```
+# [global]
+export DAEMON_DATA_DIR="/srv/daemon-data"
+export APP_API_KEY="Add application api key here."
+export PANEL_FQDN="https://Add the FQDN of your panel here."
+```
+
+**Usage:**
+```
+sh transfer-server.sh # There are no arguments for now!
+
+Start or resume a screen session: screen -R transfer-server
+Detach from a screen session: CTRL+A+D
+Kill a screen session: CTRL+A+K
+```
 
 # Contact and contribution
 If you have issues, ideas or want to contribute you can [join my discord server](https://discord.gg/VMSDGVD) to have a chat and explain your situation. :)
