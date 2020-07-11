@@ -1,6 +1,22 @@
 #!/bin/sh
 # Solution to this problem: https://github.com/pterodactyl/panel/issues/459
 # Reference to iptables NAT tutorial: https://www.karlrupp.net/en/computer/nat_tutorial
+#H#
+#H# ip-mapper-nft.sh — Maps container IPs to public IPs set in their environment from the panel.
+#H#
+#H# Examples:
+#H#   sh ip-mapper-nft.sh
+#H#   sh ip-mapper-nft.sh --list <all | uuid>
+#H#   sh ip-mapper-nft.sh --remove <all | uuid>
+#H#
+#H# Options:
+#H#   --list <all | UUID>      Lists active rules added by the script.
+#H#   --remove <all | UUID>    Removes rules added by the script.
+#H#   --help                   Shows this message.
+
+help() {
+    sed -rn 's/^#H# ?//;T;p' "$0"
+}
 
 removeRule() {
     echo "Removing rules from nat IP-MAPPER-POSTROUTING: $1"
@@ -57,6 +73,10 @@ elif [ "$1" = "--list" ]; then
     [ -z "$2" ] && echo 'Specify server id or "all"' && exit
     [ "$2" = "all" ] && listRule ip-mapper || listRule "$2"
     exit
+
+elif [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
+    help
+    exit 0
 fi
 
 echo "Listening for docker events..."

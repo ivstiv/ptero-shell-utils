@@ -1,4 +1,23 @@
 #!/bin/sh
+#H#
+#H# power-control.sh — Send power commands to groups of servers based on node, owner or server UUID.
+#H#
+#H# Examples:
+#H#   sh power-control.sh --node --action restart
+#H#   sh power-sontrol.sh --server all --action kill
+#H#
+#H# Options:
+#H#   --server <UUID | all>    Selects a particular server or all of them
+#H#   --user <username>        Selects all servers of that user
+#H#   --node <id | empty=prompt to choose>        Selects all servers on that node
+#H#   --action <start | stop | restart | kill>    Specifies the action to be executed
+#H#   --mock        This can be used to test the script without actually sending actions
+#H#   --force       Force the execution without a confirmation prompt
+#H#   --help        Shows this message.
+
+help() {
+    sed -rn 's/^#H# ?//;T;p' "$0"
+}
 
 project_root=$(dirname "$(realpath "$0")")
 # shellcheck source=/dev/null
@@ -262,6 +281,9 @@ while [ -n "$1" ]; do
 
     elif [ "$1" = "--mock" ]; then
         mock=y
+    elif [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
+        help
+        exit 0
     else 
         echo "Invalid argument: $1" && exit
     fi

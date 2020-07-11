@@ -1,4 +1,16 @@
 #!/bin/sh
+#H#
+#H# copy-server.sh — Creates a complete copy of a server and gives you commands to archive and move the files.
+#H#
+#H# Examples:
+#H#   sh copy-server.sh
+#H#
+#H# Options:
+#H#   --help        Shows this message.
+
+help() {
+    sed -rn 's/^#H# ?//;T;p' "$0"
+}
 
 project_root=$(dirname "$(realpath "$0")")
 # shellcheck source=/dev/null
@@ -99,6 +111,11 @@ checkDependencies() {
 # EXECUTION #
 #############
 
+
+if [ $# = 0 ] || [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
+    help
+    exit 0
+fi
 checkDependencies
 
 # Get all local servers on the node 

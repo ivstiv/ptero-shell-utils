@@ -1,4 +1,24 @@
 #!/bin/sh
+#H#
+#H# ptero-log.sh — A utility for more readable logs from the panel and daemon.
+#H#
+#H# Examples:
+#H#   sh ptero-log.sh --wings --live
+#H#   sh ptero-log.sh --installation e13df76a-7b62-4dab-a427-6c959e5da36d
+#H#
+#H# Options:
+#H#   --wings       Shows prettified & colored json of /srv/daemon/logs/wings.log
+#H#   --request     Shows prettified & colored json of /srv/daemon/logs/request.log
+#H#   --panel       Shows the latest log from PANEL_DIR/storage/logs
+#H#   --installation <server_id>    Shows scrollable install log of server
+#H#   --stats       Shows container's resources usage
+#H#   --live        Updates the log live
+#H#   --upload      Uploads the output to bin.ptdl.co (NOT IMPLEMENTED)
+#H#   --help        Shows this message.
+
+help() {
+    sed -rn 's/^#H# ?//;T;p' "$0"
+}
 
 project_root=$(dirname "$(realpath "$0")")
 # shellcheck source=/dev/null
@@ -45,6 +65,9 @@ while [ -n "$1" ]; do
         uniqueArguments=$(( uniqueArguments+1))
     elif [ "$1" = "--live" ]; then
         live=y
+    elif [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
+        help
+        exit 0
     else 
         echo "Invalid argument: $1" && exit
     fi
@@ -64,7 +87,7 @@ elif [ "$wings" = "y" ];then
     if [ "$live" = "y" ];then
         tailf "$DAEMON_DIR/logs/wings.log" | jq -C .
     else
-        "$DAEMON_DIR/logs/wings.log" | jq -C . | less -R +G
+        jq -C . "$DAEMON_DIR/logs/request.log" | less -R +G
     fi
 
 elif [ "$request" = "y" ];then
@@ -75,7 +98,7 @@ elif [ "$request" = "y" ];then
     if [ "$live" = "y" ];then
         tailf "$DAEMON_DIR/logs/request.log" | jq -C .
     else
-        "$DAEMON_DIR/logs/request.log" | jq -C . | less -R +G
+        jq -C . "$DAEMON_DIR/logs/request.log" | less -R +G
     fi
 
 elif [ -n "$installation" ];then
@@ -86,7 +109,7 @@ elif [ -n "$installation" ];then
     if [ "$live" = "y" ];then
         tailf -n 40 "$DAEMON_DIR/config/servers/$installation/install.log"
     else
-        "$DAEMON_DIR/config/servers/$installation/install.log" | less -R +G
+        less -R +G "$DAEMON_DIR/config/servers/$installation/install.log"
     fi
     
 elif [ "$panel" = "y" ];then

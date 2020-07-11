@@ -1,4 +1,22 @@
 #!/bin/sh
+#H#
+#H# restore-server.sh — The script will delete the server's data and download then decompress a backup into the corresponding directory.
+#H#
+#H# Examples:
+#H#   sh restore-server.sh --server e13df76a-7b62-4dab-a427-6c959e5da36d
+#H#   sh restore-server.sh --server e13df76a-7b62-4dab-a427-6c959e5da36d --download-only
+#H#
+#H# Options:
+#H#   --server <uuid>   Selects a particular server
+#H#   --backups-location <path || BACKUP_DESTINATION>   The directory of the backups
+#H#   --daemon-data <path || DAEMON_DATA_DIR>           The directory where all servers are
+#H#   --local           Tells the script to restore from a local directory
+#H#   --download-only   Only downloads the backup
+#H#   --help            Shows this message.
+
+help() {
+    sed -rn 's/^#H# ?//;T;p' "$0"
+}
 
 project_root=$(dirname "$(realpath "$0")")
 # shellcheck source=/dev/null
@@ -79,9 +97,9 @@ checkDependencies() {
 checkDependencies
 
 
-####################
-# VALIDATE ARGUMENTS  #
-####################
+######################
+# VALIDATE ARGUMENTS #
+######################
 
 # set defaults 
 server='' daemonData='' backupsLocation='' isLocalBackup='n' downloadOnly='n'
@@ -107,6 +125,10 @@ while [ -n "$1" ]; do
 
     elif [ "$1" = "--download-only" ]; then
         downloadOnly="y"
+        
+    elif [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
+        help
+        exit 0
     else 
         echo "Invalid argument: $1" && exit
     fi
