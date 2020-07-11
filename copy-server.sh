@@ -4,7 +4,6 @@ project_root=$(dirname "$(realpath "$0")")
 # shellcheck source=/dev/null
 . "$project_root/config.sh"
 
-
 # accepts parameter as starting page
 getAllNodes() {
     [ -z "$1" ] && page="1" || page="$1"
@@ -75,6 +74,17 @@ getServerByUUID() {
     fi
 }
 
+# accepts serverUUID as parameter
+suspendServer() {
+    printf "\nSuspending the old server. . .\n"
+    oldServerID=$(getServerByUUID "$1" | jq '.attributes.id')
+    curl -s "$PANEL_FQDN/api/application/servers/$oldServerID/suspend" \
+        -H "Authorization: Bearer $APP_API_KEY" \
+        -H "Content-Type: application/json" \
+        -H "Accept: Application/vnd.pterodactyl.v1+json" \
+        -X POST 
+}
+
 checkDependencies() {
     mainShellPID="$$"
     printf "curl\njq\nawk\ngrep\ncut\nsshpass\nsftp\nssh-keyscan" | while IFS= read -r program; do
@@ -85,20 +95,11 @@ checkDependencies() {
     done
 }
 
+#############
+# EXECUTION #
+#############
+
 checkDependencies
-
-echo "Just a reminder before you continue. Did you start this script in a detachable session?"
-echo "It can take very long time for the file transfer to finish, so it is a good idea to run this inside tmux or screen!"
-while true; do
-    printf "Do you want to continue? (yes/no):"
-    read -r yn
-    case $yn in
-        [Yy]* ) break;;
-        [Nn]* ) echo "Stopping..." && exit;;
-        * ) echo "Please answer yes or no.";;
-    esac
-done
-
 
 # Get all local servers on the node 
 echo "Searching for servers on this node. . ."
@@ -127,7 +128,7 @@ nodeList=$(getAllNodes)
 echo "$nodeList"
 nodeID=''
 while [ -z "$nodeID" ]; do
-    printf "Where do you want to move the server to? (Node ID):"
+    printf "Where do you want to copy the server to? (Node ID):"
     read -r nodeID
     if [ "$(isNodeIDValid "$nodeID" "$nodeList")" -eq 0 ]; then
         echo "Error: Invalid node ID $nodeID" >&2
@@ -215,7 +216,6 @@ response=$(curl -s "$PANEL_FQDN/api/application/servers" \
 
 newServerID=$(echo "$response" | jq '.attributes.id')
 newServerUUID=$(echo "$response" | jq '.attributes.uuid' --raw-output)
-newServerUUIDShort=$(echo "$newServerUUID" | cut -c 1-8)
 
 if [ -z "$newServerUUID" ]; then
     echo "There was a problem with the creation of the server. Most likely a startup parameter or environmental variables has broken the json body of the request."
@@ -238,74 +238,39 @@ while [ "$isInstalled" != "true" ]; do
 done
 echo "The installation process has finished."
 
-printf "\nSuspending the old server. . .\n"
-oldServerID=$(getServerByUUID "$serverUUID" | jq '.attributes.id')
-curl -s "$PANEL_FQDN/api/application/servers/$oldServerID/suspend" \
-    -H "Authorization: Bearer $APP_API_KEY" \
-    -H "Content-Type: application/json" \
-    -H "Accept: Application/vnd.pterodactyl.v1+json" \
-    -X POST 
-
-
-proceed='y'
-echo ""
-echo "The transfer might take a very long time! I hope you can detach from this session safely."
 while true; do
-    printf "Do you want to let the script transfer the files? (yes/no):"
+    printf "Do you want to suspend the original server? (yes/no):"
     read -r yn
     case $yn in
-        [Yy]* ) break;;
-        [Nn]* ) proceed='n' && break;;
+        [Yy]* ) suspendServer "$serverUUID" && break;;
+        [Nn]* ) break;;
         * ) echo "Please answer yes or no.";;
     esac
 done
 
-echo "Preparing for file transfer. . ."
 destinationNodeInfo=$(curl -s "$PANEL_FQDN/api/application/nodes/$nodeID" \
-                                                    -H "Authorization: Bearer $APP_API_KEY" \
-                                                    -H "Content-Type: application/json" \
-                                                    -H "Accept: Application/vnd.pterodactyl.v1+json" \
-                                                    -X GET)
-                                                
-destinationFQDN=$(echo "$destinationNodeInfo" | jq '.attributes.fqdn' --raw-output)
-destinationSFTPPort=$(echo "$destinationNodeInfo" | jq '.attributes.daemon_sftp' --raw-output)
+                            -H "Authorization: Bearer $APP_API_KEY" \
+                            -H "Content-Type: application/json" \
+                            -H "Accept: Application/vnd.pterodactyl.v1+json" \
+                            -X GET)
 destinationDaemonBase=$(echo "$destinationNodeInfo" | jq '.attributes.daemon_base' --raw-output)
-
-
-if [ "$proceed" = 'y' ];then
-    # we need to add the public key of the destination in order to automate the process :/
-    hostKey=$(grep "\[$destinationFQDN\]:$destinationSFTPPort" ~/.ssh/known_hosts)
-    if [ -z "$hostKey" ]; then
-        ssh-keyscan -p "$destinationSFTPPort" -t rsa "$destinationFQDN" >> ~/.ssh/known_hosts
-    fi
-
-    echo "The script will need your panel administrator account to facilitate the FTP transfer."
-    printf "Administrator username:"
-    read -r adminUsername
-    printf "Administrator password:"
-    read -r adminPassword
-    printf "\nTransferring the server files. . .\n"
-    printf "put %s/*\nchmod 755 *\nbye\n" "$serverUUID" | sshpass -p "$adminPassword" sftp -r -P "$destinationSFTPPort" "$adminUsername"."$newServerUUIDShort"@"$destinationFQDN"
-    echo "File transfer finished!"
-else
-    echo "Since you skipped the file transfer process you will need to transfer the server's data on your own."
-    echo "You can do that with archiving the old server via:"
-    echo "cd $DAEMON_DATA_DIR/$serverUUID && tar -czvf $serverUUID.tar.gz *"
-    echo "Then move the archive to the new node and extract it via:"
-    echo "tar -xvzf $serverUUID.tar.gz -C $destinationDaemonBase/$newServerUUID"
-fi
 
 # Final messages
 printf "\n\n"
 echo "Congratulations! The copy of server $serverUUID was created successfully!"
-echo "The old server has been suspended. You can delete it whenever you want."
 echo "New server UUID: $newServerUUID"
 echo "New server allocation $newIp:$newPort"
+
 printf "\nUnfortunately this script has its limitations and you will need to take care of the following things:\n"
 printf "1. Any subusers need to be manually added to the new server.\n"
 printf "2. Any additional allocations need to be manually setup from the panel.\n"
 printf "3. If the server had any databases, their transfer cannot be facilitated through the pterodactyl's api.\n"
-printf "4. Make sure that configuration files in the server reflect its new allocation.\n"
-echo "5. If you have permission denied issues on your new server run this command to add execute permission to all files."
-echo "chmod -R 755 $destinationDaemonBase/$newServerUUID/*"
-printf "After checking all this you should be good to go!\n"
+printf "4. Make sure that configuration files in the server reflect its new allocation.\n\n"
+
+echo "If you also want to transfer the files of the server here are a few useful commands:"
+echo "Archive the original server via:"
+echo "cd $DAEMON_DATA_DIR/$serverUUID && tar -czvf $serverUUID.tar.gz *"
+echo "Then move the archive to the new node and extract it via:"
+echo "tar -xvzf $serverUUID.tar.gz -C $destinationDaemonBase/$newServerUUID"
+echo "Or if both servers are on the same node you can just copy the files over:"
+echo "cp -R $DAEMON_DATA_DIR/$serverUUID/. $DAEMON_DATA_DIR/$newServerUUID"
