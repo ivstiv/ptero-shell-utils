@@ -20,7 +20,7 @@ help() {
 
 removeRule() {
     echo "Removing rules from nat IP-MAPPER-POSTROUTING: $1"
-    rules=$(/usr/sbin/nft list chain nat IP-MAPPER-POSTROUTING -a | grep "$1" | cut -f 1 -d ' ' --complement)
+    rules=$(/usr/sbin/nft -a list chain nat IP-MAPPER-POSTROUTING | grep "$1" | cut -f 1 -d ' ' --complement)
     if [ -z "$rules" ]; then
         echo "Couldn't find any references."
     else
